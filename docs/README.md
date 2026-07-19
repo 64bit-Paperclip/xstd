@@ -19,7 +19,7 @@ the growth strategy, the failure policy, and everything else the STL
 normally decides for you. Those things can be changed, because it's just
 a header sitting in the project.
 
-### Issues with the Standard Library
+### Why Not the Standard Library?
 - std::string's small-string optimization means almost every operation
   starts with a branch: is this string using its inline buffer or a heap
   allocation? That branch has to be predicted correctly to be free, and
