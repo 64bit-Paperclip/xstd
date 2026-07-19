@@ -79,6 +79,17 @@ a header sitting in the project.
 - FNV-1a hashing. A std::hash specialization for xstd::string so it works
   as a key in hash-based containers.
 
+## Design philosophy
+
+1. Know your code. Bounds checks are debug-only asserts, not runtime
+   guards. If you index past the end, or call something you shouldn't
+   have, that's a bug in **your code**, not something xstd is going to catch
+   for you at runtime. It doesn't do defensive programming.
+
+2. Don't design for hypothetical future requirements. Build for what's
+   actually needed right now. If a real need shows up later, handle it
+   then, with real information instead of a guess.
+
 ## Rules for anything added to xstd
 
 - No STL containers internally. That's the entire point.
