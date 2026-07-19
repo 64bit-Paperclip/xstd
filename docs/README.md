@@ -19,14 +19,20 @@ the growth strategy, the failure policy, and everything else the STL
 normally decides for you. Those things can be changed, because it's just
 a header sitting in the project.
 
-### Examples of Performance Optimizations
+### Issues with the Standard Library
 - std::string's small-string optimization means almost every operation
   starts with a branch: is this string using its inline buffer or a heap
   allocation? That branch has to be predicted correctly to be free, and
   with strings of mixed or unpredictable sizes flowing through real code,
   it doesn't always predict well. A mispredicted branch stalls the
   pipeline. That cost exists on every single string operation, not just
-  the ones that actually need to grow.
+  the ones that actually need to grow. xstd::string doesn't have SSO at
+  all. It always heap-allocates, no branch, no inline buffer, one code
+  path. For the case SSO exists to serve, small strings that don't want
+  an allocation, that's what fixed_string(N) is for: a fixed-capacity,
+  stack or inline buffer with no heap involved, ever, and no per-op
+  branch either, because there's only ever one storage location to begin
+  with.
 
 - std::vector already checks is_trivially_copyable internally and takes a
   memcpy-style fast path when that's true, so plain PODs aren't the
