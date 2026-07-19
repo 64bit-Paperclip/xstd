@@ -34,7 +34,7 @@ a header sitting in the project.
   branch either, because there's only ever one storage location to begin
   with.
 
-- std::vector already checks is_trivially_copyable internally and takes a
+- std::vector already checks `is_trivially_copyable` internally and takes a
   memcpy-style fast path when that's true, so plain PODs aren't the
   problem. The gap is everything else: a type can have a real,
   non-trivial move constructor and destructor and still be completely
