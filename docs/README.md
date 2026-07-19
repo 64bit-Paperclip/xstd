@@ -19,6 +19,34 @@ the growth strategy, the failure policy, and everything else the STL
 normally decides for you. Those things can be changed, because it's just
 a header sitting in the project.
 
+### Examples of Performance Optimizations
+- std::string's small-string optimization means almost every operation
+  starts with a branch: is this string using its inline buffer or a heap
+  allocation? That branch has to be predicted correctly to be free, and
+  with strings of mixed or unpredictable sizes flowing through real code,
+  it doesn't always predict well. A mispredicted branch stalls the
+  pipeline. That cost exists on every single string operation, not just
+  the ones that actually need to grow.
+
+- std::vector already checks is_trivially_copyable internally and takes a
+  memcpy-style fast path when that's true, so plain PODs aren't the
+  problem. The gap is everything else: a type can have a real,
+  non-trivial move constructor and destructor and still be completely
+  safe to relocate with a raw memcpy, like a struct holding a
+  unique_ptr-style owned resource, where the move constructor's only job
+  is nulling out a pointer so the old object's destructor doesn't
+  double-free it. That work is pointless during relocation specifically,
+  because the old object is never going to be destructed at all.
+  is_trivially_copyable can't see that distinction, so std::vector falls
+  back to a real move+destroy call per element for anything that isn't
+  fully trivial. xstd::vector has a trivially-relocatable trait: plain
+  trivially-copyable types still get the fast path automatically, and
+  anything else that's actually safe to relocate opts in by inheriting a
+  marker, closing that gap instead of quietly paying for it. C++26 is
+  bringing trivial relocation into the standard for real, but that means
+  std::vector's behavior here doesn't change until an entire codebase is
+  on a C++26 toolchain, which for most real projects is years away, if it
+  happens at all. This has been usable now.
 
 ## What's in here
 
